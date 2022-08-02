@@ -66,12 +66,12 @@ router.post("/register", async (req, res) => {
           var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-              user: 'trello975@gmail.com',
-              pass: 'mvfcgkgtzhraloqc'
+              user: 'tmaapp1@gmail.com',
+              pass: 'hpmuirhytnyrgtzh'
             }
           });
           var mailOptions = {
-            from: 'trello975@gmail.com',
+            from: 'tmaapp1@gmail.com',
             to: req.body.email,
             subject: 'OTP',
             text: `Please enter ${otp} in your Trello app to verufy your acount`
@@ -149,12 +149,12 @@ router.post("/resend", async (req, res) => {
       var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'trello975@gmail.com',
-          pass: 'mvfcgkgtzhraloqc'
+          user: 'tmaapp1@gmail.com',
+          pass: 'hpmuirhytnyrgtzh'
         }
       });
       var mailOptions = {
-        from: 'trello975@gmail.com',
+        from: 'tmaapp1@gmail.com',
         to: req.body.id,
         subject: 'OTP',
         text: `Please enter ${otp} in your Trello app to verify your acount`
