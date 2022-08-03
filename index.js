@@ -1,10 +1,10 @@
 const express = require('express')
+const app = express();
+const http = require('http').createServer(app)
 require('./db/connect')
 const cors = require('cors')
-
-
+const io = require('socket.io')(http)
 const port = process.env.PORT || 5000
-const app = express();
 app.use(cors())
 app.use(express.json())
 const register = require('./routers/authentication/register')
@@ -13,40 +13,57 @@ const editProfile = require('./routers/authentication/editProfile')
 const createWorkspace = require('./routers/workspace/createWorkspace')
 const getUsers = require('./routers/authentication/getUsers')
 app.use("/auth/login", require('./routers/authentication/login'))
-app.use("/workspace/request-by-admin",require('./routers/workspace/addToWorkSpaceRequest/requestByAdmin'))
-app.use("/workspace/request-accept-byUser",require('./routers/workspace/addToWorkSpaceRequest/requestAccept/requestAcceptByUser'))
-app.use("/workspace/create-task" , require('./routers/tasks/createTask'))
-app.use("/workspace/edit-task",require('./routers/tasks/editTask'))
-app.use("/workspace/get-tasks",require('./routers/tasks/getTasks'))
-app.use("/workspace/edit",require('./routers/workspace/editWorkSpace'))
-app.use("/workspace/myWorkspace/get",require('./routers/workspace/getWorkspaces'))
-app.use("/workspace/delete",require('./routers/workspace/deleteWorkSpace'))
-app.use("/workspace/request-by-user",require('./routers/workspace/addToWorkSpaceRequest/requestByUser'))
-app.use("/workspace/request-accept-byAdmin",require('./routers/workspace/addToWorkSpaceRequest/requestAccept/requestAcceptByAdmin'))
-app.use("/workspace/getNew" , require('./routers/workspace/getNewWorkspace'))
-app.use("/workspace/getRecent" , require("./routers/workspace/getRecentWorkSpaces"))
-app.use("/workspace/getUsers" , require('./routers/authentication/getWorkSpaceUsers'))
-app.use("/workspace/task/getAvatar" , require('./routers/tasks/getAvatarImages'))
-app.use("/workspace/task/statusupdate" , require("./routers/tasks/taskCompleted"))
-app.use("/single/get-user",require('./routers/authentication/getSingleUser'))
-app.use("/workspace/current/get",require('./routers/workspace/currentWorkspace'))
-app.use("/user/notifications/get" , require('./routers/authentication/getNotifications'))
-app.use("/workspace/get-user/forsendRequest",require('./routers/workspace/getUsersForSendRequest'))
-app.use("/workspace/setRecent" ,require('./routers/workspace/recentWorkspace'))
-app.use("/workspace/get/recent",require('./routers/workspace/getRecentWorkSpaces'))
-app.use("/workspace/task/delete",require('./routers/tasks/deleteTask'))
-app.use('/auth/deactivate-acount',require('./routers/authentication/deactivateAcount'))
-app.use('/workspace/leave',require('./routers/workspace/leaveWorkspace'))
-app.use('/workspace/getUsers-fortag',require('./routers/tasks/getUsersFotTag'))
-app.use('/user/forgot-password',require('./routers/authentication/forgotPassword'))
-app.use('/user/reset-password',require('./routers/authentication/resetPassword'))
+app.use("/workspace/request-by-admin", require('./routers/workspace/addToWorkSpaceRequest/requestByAdmin'))
+app.use("/workspace/request-accept-byUser", require('./routers/workspace/addToWorkSpaceRequest/requestAccept/requestAcceptByUser'))
+app.use("/workspace/create-task", require('./routers/tasks/createTask'))
+app.use("/workspace/edit-task", require('./routers/tasks/editTask'))
+app.use("/workspace/get-tasks", require('./routers/tasks/getTasks'))
+app.use("/workspace/edit", require('./routers/workspace/editWorkSpace'))
+app.use("/workspace/myWorkspace/get", require('./routers/workspace/getWorkspaces'))
+app.use("/workspace/delete", require('./routers/workspace/deleteWorkSpace'))
+app.use("/workspace/request-by-user", require('./routers/workspace/addToWorkSpaceRequest/requestByUser'))
+app.use("/workspace/request-accept-byAdmin", require('./routers/workspace/addToWorkSpaceRequest/requestAccept/requestAcceptByAdmin'))
+app.use("/workspace/getNew", require('./routers/workspace/getNewWorkspace'))
+app.use("/workspace/getRecent", require("./routers/workspace/getRecentWorkSpaces"))
+app.use("/workspace/getUsers", require('./routers/authentication/getWorkSpaceUsers'))
+app.use("/workspace/task/getAvatar", require('./routers/tasks/getAvatarImages'))
+app.use("/workspace/task/statusupdate", require("./routers/tasks/taskCompleted"))
+app.use("/single/get-user", require('./routers/authentication/getSingleUser'))
+app.use("/workspace/current/get", require('./routers/workspace/currentWorkspace'))
+app.use("/user/notifications/get", require('./routers/authentication/getNotifications'))
+app.use("/workspace/get-user/forsendRequest", require('./routers/workspace/getUsersForSendRequest'))
+app.use("/workspace/setRecent", require('./routers/workspace/recentWorkspace'))
+app.use("/workspace/get/recent", require('./routers/workspace/getRecentWorkSpaces'))
+app.use("/workspace/task/delete", require('./routers/tasks/deleteTask'))
+app.use('/auth/deactivate-acount', require('./routers/authentication/deactivateAcount'))
+app.use('/workspace/leave', require('./routers/workspace/leaveWorkspace'))
+app.use('/workspace/getUsers-fortag', require('./routers/tasks/getUsersFotTag'))
+app.use('/user/forgot-password', require('./routers/authentication/forgotPassword'))
+app.use('/user/reset-password', require('./routers/authentication/resetPassword'))
 app.use(register)
 app.use(resetPassword)
 app.use(createWorkspace)
 app.use(editProfile)
 app.use(getUsers)
 
+const room = {}
 
-app.listen(port, () => {
+
+io.on("connection", (socket) => {
+    socket.emit("get_user", socket.id)
+
+    socket.on("join_workspace", (res) => {
+        console.log(res);
+        socket.join(res);
+    })
+});
+
+
+
+
+
+
+
+http.listen(port, () => {
     console.log(`server running on port ${port} `)
 })
