@@ -36,14 +36,14 @@ router.post("/create-workspace", async (req, res) => {
 
         const addWorkSpace = await new workSpaceSchema(req.body);
         addWorkSpace.save()
-            .then(async () => {
+            .then(async (data) => {
                 const getWorkSpace = await workSpaceSchema.findOne({ workSpaceName: req.body.workSpaceName })
                 const workSpaceid = getWorkSpace._id
                 const adminWorkSpaces = adminData.workspace
                 adminWorkSpaces.push(workSpaceid)
                 adminData.workspace = adminWorkSpaces
                 const updateAdmin = await authSchema.findByIdAndUpdate(adminDataId, adminData)
-                res.status(201).send(req.body)
+                res.status(201).send(data)
             })
     }
 

@@ -58,7 +58,7 @@ router.post("/", async (req, res) => {
 
         const digit = req.body.digit
         const adminId = workSpace.adminId
-        const admin = await authSchema.findOne({ _id : adminId })
+        const admin = await authSchema.findOne({ _id: adminId })
         const adminNotifications = admin.notifications
         adminNotifications[digit].status = "true"
         admin.notifications = adminNotifications

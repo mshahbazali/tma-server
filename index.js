@@ -7,6 +7,12 @@ const io = require('socket.io')(http)
 const port = process.env.PORT || 5000
 app.use(cors())
 app.use(express.json())
+const chatSchema = require('./models/chat')
+const messageSchema = require('./models/message')
+
+
+
+
 const register = require('./routers/authentication/register')
 const resetPassword = require('./routers/authentication/resetPassword')
 const editProfile = require('./routers/authentication/editProfile')
@@ -46,15 +52,98 @@ app.use(createWorkspace)
 app.use(editProfile)
 app.use(getUsers)
 
-const room = {}
 
+
+// Chat 
+
+// Create Workspace Chat 
+
+const users = []
+
+// app.post("/workspace/chat/create", async (req, res) => {
+//     const { workspace_id } = req.body
+//     const registerWorkspace = await chatSchema.findOne({ workspace_id })
+//     if (registerWorkspace) {
+//         const exist = users.find(user => user.workspace_id === workspace_id && user.user_id === user_id);
+//         if (exist) {
+//             console.log(`This Workspace is already registered`)
+//         }
+//     }
+//     else {
+//         const user = { socket_id: req.body.socket_id, user_name: req.body.user_name, user_id: req.body.user_name, workspace_id: req.body.workspace_id };
+//         users.push(user)
+//         req.body.workspace_users = [...registerWorkspace.workspace_users, user]
+//         const addWorkspace = new chatSchema(req.body)
+//         addWorkspace.save()
+//         console.log(users);
+//         console.log(`Workspace register in chat`)
+//     }
+// })
 
 io.on("connection", (socket) => {
-    socket.emit("get_user", socket.id)
+    socket.on('create-workspace', (user) => {
+        const userData = { socket_id: socket.id, user_name: user.user_name, user_id: user.user_id, workspace_id: user.workspace_id };
+        users.push(userData)
+        console.log(users);
+        const workspaceData = { workspace_name: user.workspace_name, workspace_id: user.workspace_id, workspace_users: user.workspace_users }
+        const addWorkspace = new chatSchema(workspaceData)
+        addWorkspace.save().then((res) => {
+            socket.emit('created', res)
+        })
 
-    socket.on("join_workspace", (res) => {
-        console.log(res);
-        socket.join(res);
+
+    })
+    socket.on("join", (user) => {
+        const exist = users.find(allUser => allUser.workspace_id === user.workspace_id && allUser.user_id === user.user_id);
+        if (exist) {
+            console.log('user already added');
+        }
+        else {
+            const userData = { socket_id: socket.id, user_name: user.user_name, user_id: user.user_id, workspace_id: user.workspace_id };
+            users.push(userData)
+            console.log(users);
+            const addWorkspace = new chatSchema({ workspace_users: user.workspace_users })
+            addWorkspace.save().then((res) => {
+                socket.emit('added', res)
+            })
+        }
+    })
+    socket.on("sendMessage", (data) => {
+        const getUser = (socket_id) => users.find(user => user.socket_id === socket_id)
+        const user = getUser(socket.id)
+        console.log(user);
+        if (user) {
+            const msgToStore = {
+                user_name: user.user_name,
+                user_id: user.user_id,
+                workspace_id: data.workspace_id,
+                text: data.text
+            }
+            const msg = new messageSchema(msgToStore);
+            msg.save().then(result => {
+                io.to(data.workspace_id).emit('message', result);
+                callback()
+            })
+        }
+        else {
+            const msgToStore = {
+                user_name: data.user_name,
+                user_id: data.user_id,
+                workspace_id: data.workspace_id,
+                text: data.text
+            }
+            const msg = new messageSchema(msgToStore);
+            msg.save().then(result => {
+                io.to(data.workspace_id).emit('message', result);
+            })
+        }
+
+
+    })
+    socket.on('get-messages-history', (workspace_id) => {
+        messageSchema.find({ workspace_id }).then(result => {
+            socket.emit('output-messages', result)
+        })
     })
 });
 
