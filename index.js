@@ -10,9 +10,6 @@ app.use(express.json())
 const chatSchema = require('./models/chat')
 const messageSchema = require('./models/message')
 
-
-
-
 const register = require('./routers/authentication/register')
 const resetPassword = require('./routers/authentication/resetPassword')
 const editProfile = require('./routers/authentication/editProfile')
@@ -56,29 +53,7 @@ app.use(getUsers)
 
 // Chat 
 
-// Create Workspace Chat 
-
 const users = []
-
-// app.post("/workspace/chat/create", async (req, res) => {
-//     const { workspace_id } = req.body
-//     const registerWorkspace = await chatSchema.findOne({ workspace_id })
-//     if (registerWorkspace) {
-//         const exist = users.find(user => user.workspace_id === workspace_id && user.user_id === user_id);
-//         if (exist) {
-//             console.log(`This Workspace is already registered`)
-//         }
-//     }
-//     else {
-//         const user = { socket_id: req.body.socket_id, user_name: req.body.user_name, user_id: req.body.user_name, workspace_id: req.body.workspace_id };
-//         users.push(user)
-//         req.body.workspace_users = [...registerWorkspace.workspace_users, user]
-//         const addWorkspace = new chatSchema(req.body)
-//         addWorkspace.save()
-//         console.log(users);
-//         console.log(`Workspace register in chat`)
-//     }
-// })
 
 io.on("connection", (socket) => {
     socket.on('create-workspace', (user) => {

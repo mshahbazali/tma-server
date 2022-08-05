@@ -74,7 +74,7 @@ router.post("/register", async (req, res) => {
             from: 'tmaapp1@gmail.com',
             to: req.body.email,
             subject: 'OTP',
-            text: `Please enter ${otp} in your Trello app to verufy your acount`
+            text: `Please enter ${otp} in your TMA app to verufy your acount`
           };
           transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
@@ -157,7 +157,7 @@ router.post("/resend", async (req, res) => {
         from: 'tmaapp1@gmail.com',
         to: req.body.id,
         subject: 'OTP',
-        text: `Please enter ${otp} in your Trello app to verify your acount`
+        text: `Please enter ${otp} in your TMA app to verify your acount`
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
